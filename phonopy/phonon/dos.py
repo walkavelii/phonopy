@@ -333,7 +333,7 @@ class ProjectedDos(Dos):
                 d /= np.linalg.norm(direction)
                 proj_eigvecs = self._eigenvectors[:, i_x, :] * d[0]
                 proj_eigvecs += self._eigenvectors[:, i_y, :] * d[1]
-                proj_eigvecs += self._eigenvectors[:, i_z, :] * d[2]
+                proj_eigvecs += self._eigenvectors[:, i_z, :] * d[2
                 self._eigvecs2 = np.abs(proj_eigvecs) ** 2
             else:
                 n = np.array(plane_normal, dtype="double")

@@ -297,53 +297,54 @@ class ProjectedDos(Dos):
         the number of atoms.
 
     """
+    def __init__(
+        self,
+        mesh_object: Mesh,
+        sigma=None,
+        use_tetrahedron_method=False,
+        direction=None,
+        xyz_projection=False,
+        plane_normal=None, # new parameter for the plane's normal
+    ):
+        """Init method."""
+        super().__init__(
+            mesh_object,
+            sigma=sigma,
+            use_tetrahedron_method=use_tetrahedron_method,
+        )
+        self._eigenvectors = self._mesh_object.eigenvectors
+        self._projected_dos = None
 
-   def __init__(
-    self,
-    mesh_object: Mesh,
-    sigma=None,
-    use_tetrahedron_method=False,
-    direction=None,
-    xyz_projection=False,
-    plane_normal=None, # the normal vector to the plane
-):
-    """Init method."""
-    super().__init__(
-        mesh_object,
-        sigma=sigma,
-        use_tetrahedron_method=use_tetrahedron_method,
-    )
-    self._eigenvectors = self._mesh_object.eigenvectors
-    self._projected_dos = None
-
-    if xyz_projection:
-        self._eigvecs2 = np.abs(self._eigenvectors) ** 2
-    else:
-        num_atom = self._frequencies.shape[1] // 3
-        i_x = np.arange(num_atom, dtype="int") * 3
-        i_y = np.arange(num_atom, dtype="int") * 3 + 1
-        i_z = np.arange(num_atom, dtype="int") * 3 + 2
-        if direction is None:
-            self._eigvecs2 = np.abs(self._eigenvectors[:, i_x, :]) ** 2
-            self._eigvecs2 += np.abs(self._eigenvectors[:, i_y, :]) ** 2
-            self._eigvecs2 += np.abs(self._eigenvectors[:, i_z, :]) ** 2
+        if xyz_projection:
+            self._eigvecs2 = np.abs(self._eigenvectors) ** 2
         else:
-            if plane_normal is None:
-                d = np.array(direction, dtype="double")
-                d /= np.linalg.norm(direction)
-                proj_eigvecs = self._eigenvectors[:, i_x, :] * d[0]
-                proj_eigvecs += self._eigenvectors[:, i_y, :] * d[1]
-                proj_eigvecs += self._eigenvectors[:, i_z, :] * d[2]
-                self._eigvecs2 = np.abs(proj_eigvecs) ** 2
+            num_atom = self._frequencies.shape[1] // 3
+            i_x = np.arange(num_atom, dtype="int") * 3
+            i_y = np.arange(num_atom, dtype="int") * 3 + 1
+            i_z = np.arange(num_atom, dtype="int") * 3 + 2
+            if direction is None:
+                self._eigvecs2 = np.abs(self._eigenvectors[:, i_x, :]) ** 2
+                self._eigvecs2 += np.abs(self._eigenvectors[:, i_y, :]) ** 2
+                self._eigvecs2 += np.abs(self._eigenvectors[:, i_z, :]) ** 2
             else:
-                n = np.array(plane_normal, dtype="double")
-                n /= np.linalg.norm(plane_normal)
-                proj_eigvecs = self._eigenvectors.copy()
-                for idx in [i_x, i_y, i_z]:
-                    orthogonal_component = np.sum(self._eigenvectors[:, idx, :] * n, axis=-1, keepdims=True) * n
-                    proj_eigvecs[:, idx, :] -= orthogonal_component
+                if plane_normal is None:
+                    d = np.array(direction, dtype="double")
+                    d /= np.linalg.norm(direction)
+                    proj_eigvecs = self._eigenvectors[:, i_x, :] * d[0]
+                    proj_eigvecs += self._eigenvectors[:, i_y, :] * d[1]
+                    proj_eigvecs += self._eigenvectors[:, i_z, :] * d[2]
+                    self._eigvecs2 = np.abs(proj_eigvecs) ** 2
+                else:
+                    n = np.array(plane_normal, dtype="double")
+                    n /= np.linalg.norm(plane_normal)
+                    proj_eigvecs = self._eigenvectors.copy()
+                    for idx in [i_x, i_y, i_z]:
+                        orthogonal_component = np.sum(self._eigenvectors[:, idx, :] * n, axis=-1, keepdims=True) * n
+                        proj_eigvecs[:, idx, :] -= orthogonal_component
                 self._eigvecs2 = np.abs(proj_eigvecs) ** 2
-    self._openmp_thm = True
+
+        self._openmp_thm = True
+
 
     @property
     def partial_dos(self):

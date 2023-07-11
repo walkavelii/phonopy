@@ -298,7 +298,7 @@ class ProjectedDos(Dos):
 
     """
 
-    def __init__(
+   def __init__(
     self,
     mesh_object: Mesh,
     sigma=None,
@@ -333,7 +333,7 @@ class ProjectedDos(Dos):
                 d /= np.linalg.norm(direction)
                 proj_eigvecs = self._eigenvectors[:, i_x, :] * d[0]
                 proj_eigvecs += self._eigenvectors[:, i_y, :] * d[1]
-                proj_eigvecs += self._eigenvectors[:, i_z, :] * d[2
+                proj_eigvecs += self._eigenvectors[:, i_z, :] * d[2]
                 self._eigvecs2 = np.abs(proj_eigvecs) ** 2
             else:
                 n = np.array(plane_normal, dtype="double")
@@ -343,9 +343,7 @@ class ProjectedDos(Dos):
                     orthogonal_component = np.sum(self._eigenvectors[:, idx, :] * n, axis=-1, keepdims=True) * n
                     proj_eigvecs[:, idx, :] -= orthogonal_component
                 self._eigvecs2 = np.abs(proj_eigvecs) ** 2
-            
-           
-        self._openmp_thm = True
+    self._openmp_thm = True
 
     @property
     def partial_dos(self):
